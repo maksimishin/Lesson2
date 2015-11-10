@@ -18,7 +18,7 @@ public class App    {
     static String url       = "http://localhost:11443/wp-login.php";
     static String name      = "root";
     static String password  = "1234";
-    static String postTitle = "My First title" + System.currentTimeMillis();
+    static String postTitle = "My First title " + System.currentTimeMillis();
     static String postBody  = "One upon a time lived Vadim who provided Selenium's course";
     public static void main( String[] args ) {
         driver = new FirefoxDriver();
@@ -68,7 +68,7 @@ public class App    {
         driver.switchTo().defaultContent();
 
 
-        // Click publish
+        // Click 'Publish'
         expression = "//input[@id=\"publish\" and @value=\"Publish\" and @class=\"button button-primary button-large\"]";
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(expression)));
         temp = driver.findElement(By.xpath(expression));
@@ -80,7 +80,7 @@ public class App    {
         temp = driver.findElement(By.xpath(expression));
         temp.click();
 
-        //
+        //Find new message in the message list
         expression = "//a[@class=\"row-title\" and contains(text(),\""+postTitle+"\")]";
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(expression)));
         driver.findElement(By.xpath(expression));
