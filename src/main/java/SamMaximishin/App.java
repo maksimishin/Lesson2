@@ -5,86 +5,71 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+import pageobjects.LoginPage;
+import pageobjects.MainPage;
 
 /**
  * Hello world!
  *
  */
-public class App    {
-    protected static WebDriver driver;
-    protected static WebDriverWait wait;
+public class App  extends BaseTest  {
+    //protected static WebDriver driver;
+    //protected static WebDriverWait wait;
+    LoginPage loginPage;
+    MainPage mainPage;
+
     static String url       = "http://localhost:11443/wp-login.php";
     static String name      = "root";
     static String password  = "1234";
     static String postTitle = "My First title " + System.currentTimeMillis();
     static String postBody  = "One upon a time lived Vadim who provided Selenium's course";
-    public static void main( String[] args ) {
-        driver = new FirefoxDriver();
-        wait = new WebDriverWait(driver, 10);
-        driver.navigate().to(url);
-
-        String expression;
-        WebElement loginWE    = driver.findElement(By.id("user_login"));
-        WebElement passwordWE = driver.findElement(By.id("user_pass"));
-        WebElement submit     = driver.findElement(By.id("wp-submit"));
-
-        loginWE.sendKeys(name);
-        passwordWE.sendKeys(password);
-        submit.click();
-
-        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.id("welcome-panel")));
-
-        // Click Posts
-        WebElement temp = driver.findElement(By.xpath("//div[@class=\"wp-menu-name\" and text()=\"Posts\"]"));
-        temp.click();
-
-        //click All posts
-        expression = "//a[@class=\"wp-first-item current\" and contains(text(),\"All Posts\")]";
-        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(expression)));
-        temp = driver.findElement(By.xpath(expression));
-        temp.click();
-
-        //Click Add new
-        expression = "//a[@class=\"page-title-action\" and contains(text(),\"Add New\")]";
-        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(expression)));
-        //Add new
-        temp = driver.findElement(By.xpath(expression));
-        temp.click();
-
-        //Enter title
-        expression = "//input[@id=\"title\"]";
-        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(expression)));
-        temp = driver.findElement(By.xpath(expression));
-        temp.sendKeys(postTitle);
-
-        //Enter Message
-        driver.switchTo().frame("content_ifr");
-        expression = "//body[@id=\"tinymce\"]";
-        temp = driver.findElement(By.xpath(expression));
-        temp.click();
-        temp.sendKeys(postBody);
-        driver.switchTo().defaultContent();
 
 
-        // Click 'Publish'
-        expression = "//input[@id=\"publish\" and @value=\"Publish\" and @class=\"button button-primary button-large\"]";
-        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(expression)));
-        temp = driver.findElement(By.xpath(expression));
-        temp.click();
-
-        //click 'All posts' to return to posts list
-        expression = "//a[@class=\"wp-first-item current\" and contains(text(),\"All Posts\")]";
-        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(expression)));
-        temp = driver.findElement(By.xpath(expression));
-        temp.click();
-
-        //Find new message in the message list
-        expression = "//a[@class=\"row-title\" and contains(text(),\""+postTitle+"\")]";
-        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(expression)));
-        driver.findElement(By.xpath(expression));
-
-
+    @BeforeClass
+    public void initPages(){
+         driver = new FirefoxDriver();
+         loginPage = PageFactory.initElements(driver,LoginPage.class);
+         mainPage  = PageFactory.initElements(driver,MainPage.class);
     }
+
+    @Test(priority = 21, enabled = true)
+    public void loginForum(){
+        loginPage.open(url);
+        loginPage.login(name, password);
+    }
+
+    @Test(priority = 61, enabled = true)
+    public void createPost(){
+        mainPage.createPost(postTitle, postBody);
+    }
+
+    @Test(priority = 81, enabled = true)
+    public void postExists(){
+        mainPage.navigateToPostList();
+        Assert.assertTrue(mainPage.postExists(postTitle));
+    }
+
+    @Test(priority = 101, enabled = true)
+    public void deleteAllPosts(){
+        mainPage.deleteAllPosts();
+    }
+
+    @Test(priority = 121, enabled = true)
+    public void allPostsDeleted(){
+        Assert.assertEquals(mainPage.getPostCount(), 0, "There are 0 posts.");
+    }
+
+
+    @AfterClass
+    public void finish(){
+        //driver.close();
+    }
+
 }
